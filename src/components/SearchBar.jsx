@@ -1,21 +1,15 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { Search, X, ChefHat } from 'lucide-react';
 
-interface SearchBarProps {
-  onSearch: (query: string, searchType: 'name' | 'ingredient') => void;
-  initialValue?: string;
-  placeholder?: string;
-}
-
-export const SearchBar: React.FC<SearchBarProps> = ({
+export const SearchBar = ({
   onSearch,
   initialValue = '',
   placeholder = 'Search recipes by name...'
 }) => {
   const [query, setQuery] = useState(initialValue);
-  const [searchType, setSearchType] = useState<'name' | 'ingredient'>('name');
+  const [searchType, setSearchType] = useState('name');
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = (e) => {
     e.preventDefault();
     onSearch(query.trim(), searchType);
   };

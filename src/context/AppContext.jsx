@@ -1,51 +1,24 @@
-import React, { createContext, useContext, useReducer, useEffect, ReactNode } from 'react';
-import {
-  AppState,
-  Meal,
-  PlannedMeal,
-  DayOfWeek,
-  MealSlot,
-  ThemeMode,
-  WeeklyMealPlan
-} from '../types';
+import { createContext, useContext, useReducer, useEffect,  } from 'react';
 import { filterReducer, createEmptyMealPlan } from './AppReducer';
 import { useLocalStorage } from '../hooks/useLocalStorage';
 
-export interface AppContextType extends AppState {
-  addFavourite: (meal: Meal) => void;
-  removeFavourite: (idMeal: string) => void;
-  toggleFavourite: (meal: Meal) => void;
-  isFavourite: (idMeal: string) => boolean;
-  setMealPlan: (day: DayOfWeek, slot: MealSlot, meal: PlannedMeal | null) => void;
-  clearMealPlan: () => void;
-  setActiveCategory: (category: string) => void;
-  setActiveArea: (area: string) => void;
-  setFilters: (category: string, area: string) => void;
-  toggleTheme: () => void;
-  setTheme: (mode: ThemeMode) => void;
-}
+const AppContext = createContext(undefined);
 
-const AppContext = createContext<AppContextType | undefined>(undefined);
-
-interface AppProviderProps {
-  children: ReactNode;
-}
-
-function getInitialTheme(): ThemeMode {
+function getInitialTheme() {
   if (typeof window === 'undefined') return 'light';
-  const stored = localStorage.getItem('theme') as ThemeMode | null;
+  const stored = localStorage.getItem('theme');
   if (stored === 'light' || stored === 'dark') return stored;
   if (window.matchMedia('(prefers-color-scheme: dark)').matches) return 'dark';
   return 'light';
 }
 
-export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
-  const [favourites, setFavourites] = useLocalStorage<Meal[]>('favourites', []);
-  const [mealPlan, setMealPlan] = useLocalStorage<WeeklyMealPlan>(
+export const AppProvider = ({ children }) => {
+  const [favourites, setFavourites] = useLocalStorage('favourites', []);
+  const [mealPlan, setMealPlan] = useLocalStorage(
     'mealPlan',
     createEmptyMealPlan()
   );
-  const [theme, setTheme] = useLocalStorage<ThemeMode>('theme', getInitialTheme());
+  const [theme, setTheme] = useLocalStorage('theme', getInitialTheme());
   const [filterState, dispatch] = useReducer(filterReducer, {
     activeCategory: '',
     activeArea: ''
@@ -60,18 +33,18 @@ export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
     }
   }, [theme]);
 
-  const addFavourite = (meal: Meal) => {
+  const addFavourite = (meal) => {
     setFavourites((prev) => {
       if (prev.some((item) => item.idMeal === meal.idMeal)) return prev;
       return [...prev, meal];
     });
   };
 
-  const removeFavourite = (idMeal: string) => {
+  const removeFavourite = (idMeal) => {
     setFavourites((prev) => prev.filter((item) => item.idMeal !== idMeal));
   };
 
-  const toggleFavourite = (meal: Meal) => {
+  const toggleFavourite = (meal) => {
     const exists = favourites.some((item) => item.idMeal === meal.idMeal);
     if (exists) {
       removeFavourite(meal.idMeal);
@@ -80,11 +53,11 @@ export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
     }
   };
 
-  const isFavourite = (idMeal: string): boolean => {
+  const isFavourite = (idMeal) => {
     return favourites.some((item) => item.idMeal === idMeal);
   };
 
-  const setMealPlanSlot = (day: DayOfWeek, slot: MealSlot, meal: PlannedMeal | null) => {
+  const setMealPlanSlot = (day, slot, meal) => {
     setMealPlan((prev) => ({
       ...prev,
       [day]: { ...prev[day], [slot]: meal }
@@ -95,15 +68,15 @@ export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
     setMealPlan(createEmptyMealPlan());
   };
 
-  const setActiveCategory = (category: string) => {
+  const setActiveCategory = (category) => {
     dispatch({ type: 'SET_CATEGORY', payload: category });
   };
 
-  const setActiveArea = (area: string) => {
+  const setActiveArea = (area) => {
     dispatch({ type: 'SET_AREA', payload: area });
   };
 
-  const setFilters = (category: string, area: string) => {
+  const setFilters = (category, area) => {
     dispatch({ type: 'SET_FILTERS', payload: { category, area } });
   };
 

@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useMemo } from 'react';
+import { useEffect, useState, useMemo } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { useMeals } from '../hooks/useMeals';
 import { useApp } from '../context/AppContext';
@@ -10,7 +10,7 @@ import { EmptyState } from '../components/EmptyState';
 import { Pagination } from '../components/Pagination';
 import { Filter, SlidersHorizontal } from 'lucide-react';
 
-export const Recipes: React.FC = () => {
+export const Recipes = () => {
   const [searchParams, setSearchParams] = useSearchParams();
   const { activeCategory, activeArea, setFilters } = useApp();
 
@@ -31,7 +31,7 @@ export const Recipes: React.FC = () => {
   } = useMeals();
 
   const [localSearch, setLocalSearch] = useState(urlSearch || urlIngredient);
-  const [searchType, setSearchType] = useState<'name' | 'ingredient'>(
+  const [searchType, setSearchType] = useState(
     urlIngredient ? 'ingredient' : 'name'
   );
   const [currentPage, setCurrentPage] = useState(1);
@@ -75,7 +75,7 @@ export const Recipes: React.FC = () => {
     fetchFilteredMeals
   ]);
 
-  const updateUrlParams = (updates: Record<string, string | null>) => {
+  const updateUrlParams = (updates) => {
     const newParams = new URLSearchParams(searchParams);
     Object.entries(updates).forEach(([key, value]) => {
       if (value) {
@@ -87,29 +87,29 @@ export const Recipes: React.FC = () => {
     setSearchParams(newParams);
   };
 
-  const handleSearchBarSubmit = (q: string, type: 'name' | 'ingredient') => {
+  const handleSearchBarSubmit = (q, type) => {
     setCurrentPage(1);
     setLocalSearch(q);
     setSearchType(type);
 
     if (q) {
       if (type === 'ingredient') {
-        updateUrlParams({ ingredient: q, search: null });
+        updateUrlParams({ ingredient: q, search });
       } else {
-        updateUrlParams({ search: q, ingredient: null });
+        updateUrlParams({ search: q, ingredient });
       }
     } else {
-      updateUrlParams({ search: null, ingredient: null });
+      updateUrlParams({ search, ingredient });
     }
   };
 
-  const handleCategoryChoice = (cat: string) => {
+  const handleCategoryChoice = (cat) => {
     setCurrentPage(1);
     setFilters(cat, activeArea);
     updateUrlParams({ category: cat || null });
   };
 
-  const handleAreaChoice = (area: string) => {
+  const handleAreaChoice = (area) => {
     setCurrentPage(1);
     setFilters(activeCategory, area);
     updateUrlParams({ area: area || null });

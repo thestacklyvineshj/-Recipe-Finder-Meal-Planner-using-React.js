@@ -1,27 +1,22 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Calendar, Trash2, Plus, X, Search, Check, UtensilsCrossed, Printer, Star } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
-import { WeeklyMealPlan, DayOfWeek, MealSlot, PlannedMeal, Meal } from '../types';
 import { useApp } from '../context/AppContext';
 import { DAYS_OF_WEEK, MEAL_SLOTS } from '../utils/constants';
 import { mealApi } from '../utils/api';
 
-interface MealPlanGridProps {
-  onPrint?: () => void;
-}
-
-export const MealPlanGrid: React.FC<MealPlanGridProps> = ({ onPrint }) => {
+export const MealPlanGrid = ({ onPrint }) => {
   const { mealPlan, setMealPlan, clearMealPlan, favourites } = useApp();
-  const [activeDayTab, setActiveDayTab] = useState<DayOfWeek>('Monday');
+  const [activeDayTab, setActiveDayTab] = useState('Monday');
   
   // Modal Selector State
-  const [selectorTarget, setSelectorTarget] = useState<{ day: DayOfWeek; slot: MealSlot } | null>(null);
+  const [selectorTarget, setSelectorTarget] = useState(null);
   const [searchQuery, setSearchQuery] = useState('');
-  const [searchResults, setSearchResults] = useState<Meal[]>([]);
+  const [searchResults, setSearchResults] = useState([]);
   const [searching, setSearching] = useState(false);
 
-  const handleOpenSelector = (day: DayOfWeek, slot: MealSlot) => {
+  const handleOpenSelector = (day, slot) => {
     setSelectorTarget({ day, slot });
     setSearchQuery('');
     setSearchResults([]);
@@ -31,7 +26,7 @@ export const MealPlanGrid: React.FC<MealPlanGridProps> = ({ onPrint }) => {
     setSelectorTarget(null);
   };
 
-  const handleSearchMeals = async (e: React.FormEvent) => {
+  const handleSearchMeals = async (e) => {
     e.preventDefault();
     if (!searchQuery.trim()) return;
 
@@ -46,14 +41,14 @@ export const MealPlanGrid: React.FC<MealPlanGridProps> = ({ onPrint }) => {
     }
   };
 
-  const handleSelectMeal = (meal: PlannedMeal) => {
+  const handleSelectMeal = (meal) => {
     if (!selectorTarget) return;
     const { day, slot } = selectorTarget;
     setMealPlan(day, slot, meal);
     handleCloseSelector();
   };
 
-  const handleRemoveMeal = (day: DayOfWeek, slot: MealSlot, e: React.MouseEvent) => {
+  const handleRemoveMeal = (day, slot, e) => {
     e.preventDefault();
     e.stopPropagation();
     setMealPlan(day, slot, null);
@@ -364,14 +359,7 @@ export const MealPlanGrid: React.FC<MealPlanGridProps> = ({ onPrint }) => {
 };
 
 /* Individual Cell Card component for the meal planner */
-interface SlotCardProps {
-  meal: PlannedMeal | null;
-  onPlan: () => void;
-  onRemove: (e: React.MouseEvent) => void;
-  compact?: boolean;
-}
-
-const SlotCard: React.FC<SlotCardProps> = ({ meal, onPlan, onRemove, compact = false }) => {
+const SlotCard = ({ meal, onPlan, onRemove, compact = false }) => {
   if (!meal) {
     return (
       <button

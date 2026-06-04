@@ -6,7 +6,6 @@ import { Recipes } from './pages/Recipes';
 import { RecipeDetail } from './pages/RecipeDetail';
 import { Favourites } from './pages/Favourites';
 import { MealPlanner } from './pages/MealPlanner';
-import { RecipesLayout } from './layouts/RecipesLayout';
 
 function Layout() {
   return (
@@ -21,6 +20,10 @@ function Layout() {
       </footer>
     </div>
   );
+}
+
+function RecipesLayout() {
+  return <Outlet />;
 }
 
 export default function App() {

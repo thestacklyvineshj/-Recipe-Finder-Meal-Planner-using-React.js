@@ -1,7 +1,7 @@
 /**
  * Save data to LocalStorage
  */
-export const setStorageItem = <T>(key: string, value: T): void => {
+export const setStorageItem = (key, value) => {
   try {
     if (typeof window !== 'undefined') {
       localStorage.setItem(key, JSON.stringify(value));
@@ -14,7 +14,7 @@ export const setStorageItem = <T>(key: string, value: T): void => {
 /**
  * Retrieve data from LocalStorage
  */
-export const getStorageItem = <T>(key: string, defaultValue: T): T => {
+export const getStorageItem = (key, defaultValue) => {
   try {
     if (typeof window !== 'undefined') {
       const item = localStorage.getItem(key);

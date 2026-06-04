@@ -1,32 +1,31 @@
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState, useMemo } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import { Heart, Calendar, CheckSquare, Youtube, Clock, ArrowLeft, Plus, BookmarkCheck, Utensils, RefreshCw, ChefHat } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { useApp } from '../context/AppContext';
 import { useFavourites } from '../hooks/useFavourites';
 import { mealApi } from '../utils/api';
-import { Meal, DayOfWeek, MealSlot } from '../types';
 import { DAYS_OF_WEEK, MEAL_SLOTS } from '../utils/constants';
 import { Loader } from '../components/Loader';
 
-export const RecipeDetail: React.FC = () => {
-  const { id } = useParams<{ id: string }>();
+export const RecipeDetail = () => {
+  const { id } = useParams();
   const navigate = useNavigate();
   const { isFavourite, toggleFavourite } = useFavourites();
   const { setMealPlan } = useApp();
 
-  const [meal, setMeal] = useState<Meal | null>(null);
+  const [meal, setMeal] = useState(null);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  const [error, setError] = useState(null);
 
   // Selector state for Inline Planner Scheduler
   const [isPlanning, setIsPlanning] = useState(false);
-  const [selectedDay, setSelectedDay] = useState<DayOfWeek>('Monday');
-  const [selectedSlot, setSelectedSlot] = useState<MealSlot>('Breakfast');
+  const [selectedDay, setSelectedDay] = useState('Monday');
+  const [selectedSlot, setSelectedSlot] = useState('Breakfast');
   const [plannedSuccess, setPlannedSuccess] = useState(false);
 
   // Checked ingredients tracker to assist the chef
-  const [checkedIngredients, setCheckedIngredients] = useState<Record<string, boolean>>({});
+  const [checkedIngredients, setCheckedIngredients] = useState>({});
 
   useEffect(() => {
     const fetchDetails = async () => {
@@ -50,9 +49,9 @@ export const RecipeDetail: React.FC = () => {
   }, [id]);
 
   // Extract ingredients list
-  const ingredients = React.useMemo(() => {
+  const ingredients = useMemo(() => {
     if (!meal) return [];
-    const list: { name: string; measure: string; id: string }[] = [];
+    const list = [];
     for (let i = 1; i <= 20; i++) {
       const ing = meal[`strIngredient${i}`];
       const meas = meal[`strMeasure${i}`];
@@ -68,7 +67,7 @@ export const RecipeDetail: React.FC = () => {
   }, [meal]);
 
   // Parse Youtube video ID for embed
-  const ytEmbedUrl = React.useMemo(() => {
+  const ytEmbedUrl = useMemo(() => {
     if (!meal || !meal.strYoutube) return null;
     const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|\&v=)([^#\&\?]*).*/;
     const match = meal.strYoutube.match(regExp);
@@ -79,7 +78,7 @@ export const RecipeDetail: React.FC = () => {
   }, [meal]);
 
   // Parse instructions into individual paragraphs
-  const instructions = React.useMemo(() => {
+  const instructions = useMemo(() => {
     if (!meal || !meal.strInstructions) return [];
     return meal.strInstructions
       .split(/\r?\n/)
@@ -93,7 +92,7 @@ export const RecipeDetail: React.FC = () => {
     if (meal) toggleFavourite(meal);
   };
 
-  const handlePlanningSubmit = (e: React.FormEvent) => {
+  const handlePlanningSubmit = (e) => {
     e.preventDefault();
     if (!meal) return;
     
@@ -113,7 +112,7 @@ export const RecipeDetail: React.FC = () => {
     }, 2500);
   };
 
-  const toggleIngredientChecked = (ingId: string) => {
+  const toggleIngredientChecked = (ingId) => {
     setCheckedIngredients((prev) => ({
       ...prev,
       [ingId]: !prev[ingId]
@@ -224,7 +223,7 @@ export const RecipeDetail: React.FC = () => {
                         </label>
                         <select
                           value={selectedDay}
-                          onChange={(e) => setSelectedDay(e.target.value as DayOfWeek)}
+                          onChange={(e) => setSelectedDay(e.target.value)}
                           className="w-full text-xs p-2.5 bg-zinc-50 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 rounded-xl focus:outline-none focus:ring-1 focus:ring-amber-505 text-zinc-850 dark:text-zinc-200"
                         >
                           {DAYS_OF_WEEK.map((d) => (
@@ -241,7 +240,7 @@ export const RecipeDetail: React.FC = () => {
                         </label>
                         <select
                           value={selectedSlot}
-                          onChange={(e) => setSelectedSlot(e.target.value as MealSlot)}
+                          onChange={(e) => setSelectedSlot(e.target.value)}
                           className="w-full text-xs p-2.5 bg-zinc-50 dark:bg-zinc-805 border border-zinc-200 dark:border-zinc-700 rounded-xl focus:outline-none focus:ring-1 focus:ring-amber-505 text-zinc-850 dark:text-zinc-200"
                         >
                           {MEAL_SLOTS.map((s) => (

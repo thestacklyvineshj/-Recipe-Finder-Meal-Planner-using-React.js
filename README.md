@@ -82,7 +82,7 @@ The UI supports **light and dark themes**, responsive layouts, and smooth page t
 | Layer | Technology |
 |--------|------------|
 | Framework | [React 19](https://react.dev/) |
-| Language | [TypeScript](https://www.typescriptlang.org/) |
+| Language | JavaScript (ES modules) + JSX |
 | Build tool | [Vite 6](https://vite.dev/) |
 | Routing | [React Router v6](https://reactrouter.com/) |
 | Styling | [Tailwind CSS v4](https://tailwindcss.com/) |
@@ -153,27 +153,38 @@ Unknown paths redirect to the home page.
 recipe-finder-&-meal-planner/
 ├── index.html              # App entry HTML
 ├── package.json
-├── vite.config.ts          # Vite + React + Tailwind plugins
-├── tsconfig.json
+├── vite.config.js          # Vite + React + Tailwind plugins
 ├── src/
-│   ├── main.tsx            # React root mount
-│   ├── App.tsx             # Router and layout shell
+│   ├── index.js            # React root mount (entry)
+│   ├── App.jsx             # Router and nested routes
 │   ├── index.css           # Global styles & Tailwind imports
-│   ├── types.ts            # Meal, meal plan, and app state types
-│   ├── pages/              # Route-level views
-│   │   ├── Home.tsx
-│   │   ├── Recipes.tsx
-│   │   ├── RecipeDetail.tsx
-│   │   ├── Favourites.tsx
-│   │   └── MealPlanner.tsx
-│   ├── components/         # Reusable UI (Navbar, MealCard, RecipeCard, SearchBar, etc.)
-│   ├── layouts/            # RecipesLayout (nested /recipes outlet)
-│   ├── context/            # AppProvider + filterReducer (global state)
-│   ├── hooks/              # useMeals, useFavourites, useLocalStorage
+│   ├── context/
+│   │   ├── AppContext.jsx
+│   │   └── AppReducer.js
+│   ├── hooks/
+│   │   ├── useMeals.js
+│   │   ├── useFavourites.js
+│   │   └── useLocalStorage.js
+│   ├── pages/
+│   │   ├── Home.jsx
+│   │   ├── Recipes.jsx
+│   │   ├── RecipeDetail.jsx
+│   │   ├── Favourites.jsx
+│   │   └── MealPlanner.jsx
+│   ├── components/
+│   │   ├── Navbar.jsx
+│   │   ├── MealCard.jsx
+│   │   ├── RecipeCard.jsx
+│   │   ├── CategoryFilter.jsx
+│   │   ├── Pagination.jsx
+│   │   ├── MealPlanGrid.jsx
+│   │   ├── SearchBar.jsx
+│   │   ├── Loader.jsx
+│   │   └── EmptyState.jsx
 │   └── utils/
-│       ├── api.ts          # TheMealDB fetch helpers
-│       ├── constants.ts    # Days, slots, popular filters
-│       └── localStorage.ts # Persistence helpers
+│       ├── api.js
+│       ├── localStorage.js
+│       └── constants.js
 └── README.md
 ```
 
@@ -192,7 +203,7 @@ Global state lives in **React Context** with a **reducer** (`AppContext` + `AppR
 
 ### Data fetching
 
-`src/utils/api.ts` wraps TheMealDB endpoints (search, filter, lookup, random, categories, areas). The `useMeals` hook coordinates loading and errors for page components.
+`src/utils/api.js` wraps TheMealDB endpoints (search, filter, lookup, random, categories, areas). The `useMeals` hook coordinates loading and errors for page components.
 
 ### Meal planning model
 

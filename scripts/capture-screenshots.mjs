@@ -1,4 +1,4 @@
-// Requires: npx playwright install chromium && npm install playwright (or npx)
+                      // Requires: npx playwright install chromium && npm install playwright (or npx)
 import { chromium } from 'playwright';
 import path from 'path';
 import { fileURLToPath } from 'url';

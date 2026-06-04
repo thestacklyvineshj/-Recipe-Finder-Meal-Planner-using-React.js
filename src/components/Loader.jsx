@@ -1,11 +1,5 @@
-import React from 'react';
 
-interface LoaderProps {
-  type?: 'spinner' | 'card-grid' | 'detail';
-  count?: number;
-}
-
-export const Loader: React.FC<LoaderProps> = ({ type = 'spinner', count = 6 }) => {
+export const Loader = ({ type = 'spinner', count = 6 }) => {
   if (type === 'spinner') {
     return (
       <div className="flex flex-col items-center justify-center py-12" id="spinner-loader">

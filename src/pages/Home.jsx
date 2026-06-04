@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import { useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { SearchBar } from '../components/SearchBar';
 import { CategoryFilter } from '../components/CategoryFilter';
@@ -10,7 +10,7 @@ import { useApp } from '../context/AppContext';
 import { Star, Calendar, Sparkles, MoveRight, ReceiptText } from 'lucide-react';
 import { motion } from 'motion/react';
 
-export const Home: React.FC = () => {
+export const Home = () => {
   const navigate = useNavigate();
   const { categories, meals, loading, error, fetchFeaturedMeals } = useMeals();
   const { setFilters, setActiveCategory } = useApp();
@@ -19,7 +19,7 @@ export const Home: React.FC = () => {
     fetchFeaturedMeals(4); // Fills trending grid on home
   }, [fetchFeaturedMeals]);
 
-  const handleSearch = (query: string, searchType: 'name' | 'ingredient') => {
+  const handleSearch = (query, searchType) => {
     if (searchType === 'ingredient') {
       navigate(`/recipes?ingredient=${encodeURIComponent(query)}`);
     } else {
@@ -27,7 +27,7 @@ export const Home: React.FC = () => {
     }
   };
 
-  const handleSelectCategory = (category: string) => {
+  const handleSelectCategory = (category) => {
     setFilters(category, '');
     navigate(`/recipes?category=${encodeURIComponent(category)}`);
   };

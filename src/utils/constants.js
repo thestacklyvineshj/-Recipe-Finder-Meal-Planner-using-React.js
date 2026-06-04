@@ -1,6 +1,5 @@
-import { DayOfWeek, MealSlot } from '../types';
 
-export const DAYS_OF_WEEK: DayOfWeek[] = [
+export const DAYS_OF_WEEK = [
   'Monday',
   'Tuesday',
   'Wednesday',
@@ -10,7 +9,7 @@ export const DAYS_OF_WEEK: DayOfWeek[] = [
   'Sunday'
 ];
 
-export const MEAL_SLOTS: MealSlot[] = ['Breakfast', 'Lunch', 'Dinner'];
+export const MEAL_SLOTS = ['Breakfast', 'Lunch', 'Dinner'];
 
 export const POPULAR_CATEGORIES = [
   'Beef',

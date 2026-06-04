@@ -1,4 +1,3 @@
-import React from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useFavourites } from '../hooks/useFavourites';
 import { MealCard } from '../components/MealCard';
@@ -6,7 +5,7 @@ import { EmptyState } from '../components/EmptyState';
 import { Heart, Search, ListFilter } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 
-export const Favourites: React.FC = () => {
+export const Favourites = () => {
   const { favourites } = useFavourites();
   const navigate = useNavigate();
 

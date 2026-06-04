@@ -1,13 +1,12 @@
 import { useState, useEffect, useCallback } from 'react';
-import { Meal, CategoriesResponse } from '../types';
 import { mealApi } from '../utils/api';
 
 export function useMeals() {
-  const [meals, setMeals] = useState<Meal[]>([]);
-  const [categories, setCategories] = useState<CategoriesResponse['categories']>([]);
-  const [areas, setAreas] = useState<string[]>([]);
-  const [loading, setLoading] = useState<boolean>(false);
-  const [error, setError] = useState<string | null>(null);
+  const [meals, setMeals] = useState([]);
+  const [categories, setCategories] = useState([]);
+  const [areas, setAreas] = useState([]);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
 
   // Load basic filters like Categories and Areas on mount
   useEffect(() => {
@@ -35,7 +34,7 @@ export function useMeals() {
   /**
    * Search meals by search term
    */
-  const searchMeals = useCallback(async (query: string) => {
+  const searchMeals = useCallback(async (query) => {
     setLoading(true);
     setError(null);
     try {
@@ -51,7 +50,7 @@ export function useMeals() {
   /**
    * Search meals by single ingredient
    */
-  const searchMealsByIngredient = useCallback(async (ingredient: string) => {
+  const searchMealsByIngredient = useCallback(async (ingredient) => {
     setLoading(true);
     setError(null);
     try {
@@ -67,7 +66,7 @@ export function useMeals() {
   /**
    * Fetch structured combined multi-filter categories/area recipes
    */
-  const fetchFilteredMeals = useCallback(async (category: string, area: string) => {
+  const fetchFilteredMeals = useCallback(async (category, area) => {
     setLoading(true);
     setError(null);
     try {

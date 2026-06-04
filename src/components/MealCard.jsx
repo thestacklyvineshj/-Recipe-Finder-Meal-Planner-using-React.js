@@ -1,18 +1,12 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Heart, Calendar, Plus, ChevronDown, CheckCheck, Trash2 } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
-import { Meal, DayOfWeek, MealSlot } from '../types';
 import { useApp } from '../context/AppContext';
 import { useFavourites } from '../hooks/useFavourites';
 import { DAYS_OF_WEEK, MEAL_SLOTS } from '../utils/constants';
 
-interface MealCardProps {
-  meal: Meal;
-  showRemoveFavouriteOnly?: boolean;
-}
-
-export const MealCard: React.FC<MealCardProps> = ({
+export const MealCard = ({
   meal,
   showRemoveFavouriteOnly = false
 }) => {
@@ -20,31 +14,31 @@ export const MealCard: React.FC<MealCardProps> = ({
   const { isFavourite, toggleFavourite, removeFavourite } = useFavourites();
   const { setMealPlan } = useApp();
   const [isPlanning, setIsPlanning] = useState(false);
-  const [selectedDay, setSelectedDay] = useState<DayOfWeek>('Monday');
-  const [selectedSlot, setSelectedSlot] = useState<MealSlot>('Breakfast');
+  const [selectedDay, setSelectedDay] = useState('Monday');
+  const [selectedSlot, setSelectedSlot] = useState('Breakfast');
   const [justPlanned, setJustPlanned] = useState(false);
 
   const favorited = isFavourite(idMeal);
 
-  const handleFavoriteClick = (e: React.MouseEvent) => {
+  const handleFavoriteClick = (e) => {
     e.preventDefault();
     e.stopPropagation();
     toggleFavourite(meal);
   };
 
-  const handleRemoveFavouriteClick = (e: React.MouseEvent) => {
+  const handleRemoveFavouriteClick = (e) => {
     e.preventDefault();
     e.stopPropagation();
     removeFavourite(idMeal);
   };
 
-  const handlePlannerToggle = (e: React.MouseEvent) => {
+  const handlePlannerToggle = (e) => {
     e.preventDefault();
     e.stopPropagation();
     setIsPlanning(!isPlanning);
   };
 
-  const handleScheduleSubmit = (e: React.FormEvent) => {
+  const handleScheduleSubmit = (e) => {
     e.preventDefault();
     e.stopPropagation();
     
@@ -188,7 +182,7 @@ export const MealCard: React.FC<MealCardProps> = ({
                       <label className="text-[10px] font-bold text-zinc-400 uppercase">Day</label>
                       <select
                         value={selectedDay}
-                        onChange={(e) => setSelectedDay(e.target.value as DayOfWeek)}
+                        onChange={(e) => setSelectedDay(e.target.value)}
                         className="w-full text-xs p-1.5 bg-zinc-50 dark:bg-zinc-800/80 border border-zinc-200 dark:border-zinc-700 rounded-lg focus:outline-none focus:ring-1 focus:ring-amber-500 text-zinc-800 dark:text-zinc-200"
                       >
                         {DAYS_OF_WEEK.map((d) => (
@@ -203,7 +197,7 @@ export const MealCard: React.FC<MealCardProps> = ({
                       <label className="text-[10px] font-bold text-zinc-400 uppercase">Slot</label>
                       <select
                         value={selectedSlot}
-                        onChange={(e) => setSelectedSlot(e.target.value as MealSlot)}
+                        onChange={(e) => setSelectedSlot(e.target.value)}
                         className="w-full text-xs p-1.5 bg-zinc-50 dark:bg-zinc-800/80 border border-zinc-200 dark:border-zinc-700 rounded-lg focus:outline-none focus:ring-1 focus:ring-amber-500 text-zinc-800 dark:text-zinc-200"
                       >
                         {MEAL_SLOTS.map((s) => (
