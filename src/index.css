@@ -1,0 +1,80 @@
+@import "tailwindcss";
+
+@theme {
+  --font-heading: "Outfit", "Inter", sans-serif;
+  --font-sans: "Inter", system-ui, sans-serif;
+}
+
+/* Scrollbar None Utilities */
+.scrollbar-none::-webkit-scrollbar {
+  display: none;
+}
+.scrollbar-none {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+/* Custom fade-in animations */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(5px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-fade-in {
+  animation: fadeIn 0.25s ease-out forwards;
+}
+
+/* Custom styles for checked label lists */
+.line-through-checked {
+  text-decoration: line-through;
+  opacity: 0.6;
+}
+
+/* PRINT PREVIEW RULES CONFIGS */
+@media print {
+  body {
+    background: white !important;
+    background-color: white !important;
+    color: black !important;
+  }
+  
+  html, body {
+    height: auto !important;
+    overflow: visible !important;
+  }
+
+  /* Hide interactable chrome components */
+  header, 
+  footer, 
+  button, 
+  select, 
+  form, 
+  input, 
+  [role="button"],
+  .print\:hidden {
+    display: none !important;
+  }
+
+  /* Expand hidden components or force visible prints */
+  .print\:block {
+    display: block !important;
+  }
+
+  /* Force grid sizes to show well in list layouts */
+  .lg\:grid-cols-7 {
+    display: grid !important;
+    grid-template-columns: repeat(7, minmax(0, 1fr)) !important;
+    gap: 8px !important;
+  }
+
+  /* Border styling for printed pages */
+  div, plan-slot, card {
+    border-color: #d4d4d8 !important;
+  }
+}
