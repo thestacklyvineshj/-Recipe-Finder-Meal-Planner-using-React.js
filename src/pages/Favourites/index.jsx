@@ -1,7 +1,7 @@
 import { Link, useNavigate } from 'react-router-dom';
-import { useFavourites } from '../hooks/useFavourites';
-import { MealCard } from '../components/MealCard';
-import { EmptyState } from '../components/EmptyState';
+import { useFavourites } from '../../hooks/useFavourites';
+import { MealCard } from '../../components/MealCard';
+import { EmptyState } from '../../components/EmptyState';
 import { Heart, Search, ListFilter } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 

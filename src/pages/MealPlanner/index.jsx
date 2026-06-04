@@ -1,5 +1,5 @@
-import { useApp } from '../context/AppContext';
-import { MealPlanGrid } from '../components/MealPlanGrid';
+import { useApp } from '../../context/AppContext';
+import { MealPlanGrid } from '../../components/MealPlanGrid';
 import { Calendar, Info, Sparkles } from 'lucide-react';
 
 export const MealPlanner = () => {

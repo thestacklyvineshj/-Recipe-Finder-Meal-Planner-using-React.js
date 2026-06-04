@@ -2,11 +2,11 @@ import { useEffect, useState, useMemo } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import { Heart, Calendar, CheckSquare, Youtube, Clock, ArrowLeft, Plus, BookmarkCheck, Utensils, RefreshCw, ChefHat } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
-import { useApp } from '../context/AppContext';
-import { useFavourites } from '../hooks/useFavourites';
-import { mealApi } from '../utils/api';
-import { DAYS_OF_WEEK, MEAL_SLOTS } from '../utils/constants';
-import { Loader } from '../components/Loader';
+import { useApp } from '../../context/AppContext';
+import { useFavourites } from '../../hooks/useFavourites';
+import { mealApi } from '../../utils/api';
+import { DAYS_OF_WEEK, MEAL_SLOTS } from '../../utils/constants';
+import { Loader } from '../../components/Loader';
 
 export const RecipeDetail = () => {
   const { id } = useParams();

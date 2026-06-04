@@ -4,10 +4,11 @@ import { Search, X, ChefHat } from 'lucide-react';
 export const SearchBar = ({
   onSearch,
   initialValue = '',
+  initialSearchType = 'name',
   placeholder = 'Search recipes by name...'
 }) => {
   const [query, setQuery] = useState(initialValue);
-  const [searchType, setSearchType] = useState('name');
+  const [searchType, setSearchType] = useState(initialSearchType);
 
   const handleSubmit = (e) => {
     e.preventDefault();
@@ -21,7 +22,8 @@ export const SearchBar = ({
 
   useEffect(() => {
     setQuery(initialValue);
-  }, [initialValue]);
+    setSearchType(initialSearchType);
+  }, [initialValue, initialSearchType]);
 
   return (
     <form onSubmit={handleSubmit} className="w-full flex flex-col sm:flex-row gap-3" id="search-bar-form">

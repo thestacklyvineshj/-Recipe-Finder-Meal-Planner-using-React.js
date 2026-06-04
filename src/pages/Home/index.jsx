@@ -1,19 +1,19 @@
 import { useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
-import { SearchBar } from '../components/SearchBar';
-import { CategoryFilter } from '../components/CategoryFilter';
-import { MealCard } from '../components/MealCard';
-import { Loader } from '../components/Loader';
-import { EmptyState } from '../components/EmptyState';
-import { useMeals } from '../hooks/useMeals';
-import { useApp } from '../context/AppContext';
+import { SearchBar } from '../../components/SearchBar';
+import { CategoryFilter } from '../../components/CategoryFilter';
+import { MealCard } from '../../components/MealCard';
+import { Loader } from '../../components/Loader';
+import { EmptyState } from '../../components/EmptyState';
+import { useMeals } from '../../hooks/useMeals';
+import { useApp } from '../../context/AppContext';
 import { Star, Calendar, Sparkles, MoveRight, ReceiptText } from 'lucide-react';
 import { motion } from 'motion/react';
 
 export const Home = () => {
   const navigate = useNavigate();
   const { categories, meals, loading, error, fetchFeaturedMeals } = useMeals();
-  const { setFilters, setActiveCategory } = useApp();
+  const { setFilters } = useApp();
 
   useEffect(() => {
     fetchFeaturedMeals(4); // Fills trending grid on home

@@ -1,12 +1,12 @@
 import { useState } from 'react';
 import { NavLink, Link } from 'react-router-dom';
-import { ChefHat, Heart, Calendar, Menu, X, Library } from 'lucide-react';
+import { ChefHat, Heart, Calendar, Menu, X, Library, Moon, Sun } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { useApp } from '../context/AppContext';
 import { MEAL_SLOTS, DAYS_OF_WEEK } from '../utils/constants';
 
 export const Navbar = () => {
-  const { favourites, mealPlan } = useApp();
+  const { favourites, mealPlan, theme, toggleTheme } = useApp();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   // Count planned slot meals
@@ -79,8 +79,15 @@ export const Navbar = () => {
             </NavLink>
           </nav>
 
-          {/* Mobile menu toggle */}
-          <div className="flex items-center">
+          {/* Theme toggle + mobile menu */}
+          <div className="flex items-center gap-2">
+            <button
+              onClick={toggleTheme}
+              className="p-2.5 rounded-xl border border-zinc-200/50 dark:border-zinc-800 bg-white dark:bg-zinc-900 text-zinc-650 hover:text-amber-500 dark:text-zinc-300 dark:hover:text-amber-300 shadow-sm transition cursor-pointer"
+              aria-label="Toggle dark or light mode"
+            >
+              {theme === 'light' ? <Moon className="w-4 h-4" /> : <Sun className="w-4 h-4" />}
+            </button>
             <button
               onClick={toggleMobileMenu}
               className="p-2.5 md:hidden rounded-xl border border-zinc-200/50 dark:border-zinc-850 bg-white dark:bg-zinc-900 text-zinc-650 hover:text-amber-500 dark:text-zinc-300 shadow-sm transition cursor-pointer"

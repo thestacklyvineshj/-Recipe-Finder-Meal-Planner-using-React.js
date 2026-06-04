@@ -1,18 +1,18 @@
 import { useEffect, useState, useMemo } from 'react';
 import { useSearchParams } from 'react-router-dom';
-import { useMeals } from '../hooks/useMeals';
-import { useApp } from '../context/AppContext';
-import { SearchBar } from '../components/SearchBar';
-import { CategoryFilter } from '../components/CategoryFilter';
-import { MealCard } from '../components/MealCard';
-import { Loader } from '../components/Loader';
-import { EmptyState } from '../components/EmptyState';
-import { Pagination } from '../components/Pagination';
+import { useMeals } from '../../hooks/useMeals';
+import { useApp } from '../../context/AppContext';
+import { SearchBar } from '../../components/SearchBar';
+import { CategoryFilter } from '../../components/CategoryFilter';
+import { MealCard } from '../../components/MealCard';
+import { Loader } from '../../components/Loader';
+import { EmptyState } from '../../components/EmptyState';
+import { Pagination } from '../../components/Pagination';
 import { Filter, SlidersHorizontal } from 'lucide-react';
 
 export const Recipes = () => {
   const [searchParams, setSearchParams] = useSearchParams();
-  const { activeCategory, activeArea, setFilters } = useApp();
+  const { selectedCategory, selectedArea, setFilters } = useApp();
 
   const urlSearch = searchParams.get('search') || '';
   const urlCategory = searchParams.get('category') || '';
@@ -61,15 +61,15 @@ export const Recipes = () => {
         await searchMeals(localSearch);
         return;
       }
-      await fetchFilteredMeals(activeCategory, activeArea);
+      await fetchFilteredMeals(selectedCategory, selectedArea);
     };
 
     fetchRecipes();
   }, [
     localSearch,
     searchType,
-    activeCategory,
-    activeArea,
+    selectedCategory,
+    selectedArea,
     searchMeals,
     searchMealsByIngredient,
     fetchFilteredMeals
@@ -94,24 +94,24 @@ export const Recipes = () => {
 
     if (q) {
       if (type === 'ingredient') {
-        updateUrlParams({ ingredient: q, search });
+        updateUrlParams({ ingredient: q, search: null });
       } else {
-        updateUrlParams({ search: q, ingredient });
+        updateUrlParams({ search: q, ingredient: null });
       }
     } else {
-      updateUrlParams({ search, ingredient });
+      updateUrlParams({ search: null, ingredient: null });
     }
   };
 
   const handleCategoryChoice = (cat) => {
     setCurrentPage(1);
-    setFilters(cat, activeArea);
+    setFilters(cat, selectedArea);
     updateUrlParams({ category: cat || null });
   };
 
   const handleAreaChoice = (area) => {
     setCurrentPage(1);
-    setFilters(activeCategory, area);
+    setFilters(selectedCategory, area);
     updateUrlParams({ area: area || null });
   };
 
@@ -150,16 +150,17 @@ export const Recipes = () => {
         <SearchBar
           onSearch={handleSearchBarSubmit}
           initialValue={localSearch}
+          initialSearchType={searchType}
           placeholder="Filter recipes by custom titles..."
         />
 
         {searchType === 'name' && (
           <CategoryFilter
             categories={categories}
-            selectedCategory={activeCategory}
+            selectedCategory={selectedCategory}
             onSelectCategory={handleCategoryChoice}
             areas={areas}
-            selectedArea={activeArea}
+            selectedArea={selectedArea}
             onSelectArea={handleAreaChoice}
             showAreaFilter
           />
@@ -177,7 +178,7 @@ export const Recipes = () => {
           </h2>
         </div>
 
-        {error && (
+        {error && !loading && (
           <p className="text-center text-xs text-red-500 dark:text-red-400 font-semibold py-6">
             {error}
           </p>
@@ -185,7 +186,7 @@ export const Recipes = () => {
 
         {loading ? (
           <Loader type="card-grid" count={itemsPerPage} />
-        ) : meals.length === 0 ? (
+        ) : error ? null : meals.length === 0 ? (
           <EmptyState
             title="Unable to Find Recipes"
             description="We couldn't get any culinary formulas matches your exact filter query terms. Let's start fresh!"
