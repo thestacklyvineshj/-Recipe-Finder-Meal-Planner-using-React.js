@@ -4,6 +4,7 @@ import { SearchBar } from '../components/SearchBar';
 import { CategoryFilter } from '../components/CategoryFilter';
 import { MealCard } from '../components/MealCard';
 import { Loader } from '../components/Loader';
+import { EmptyState } from '../components/EmptyState';
 import { useMeals } from '../hooks/useMeals';
 import { useApp } from '../context/AppContext';
 import { Star, Calendar, Sparkles, MoveRight, ReceiptText } from 'lucide-react';
@@ -82,7 +83,7 @@ export const Home: React.FC = () => {
       {/* Quick Navigation Cards */}
       <section className="grid grid-cols-1 md:grid-cols-2 gap-6" id="quick-navigation-grid">
         <Link
-          to="/Favourites"
+          to="/favourites"
           className="group relative bg-white dark:bg-zinc-900 border border-zinc-200/60 dark:border-zinc-800/80 p-6 rounded-2xl flex items-start gap-4 hover:shadow-md transition duration-200 cursor-pointer"
         >
           <div className="p-3.5 bg-red-500/10 text-red-500 rounded-xl group-hover:scale-110 transition duration-150">
@@ -163,6 +164,13 @@ export const Home: React.FC = () => {
 
         {loading ? (
           <Loader type="card-grid" count={4} />
+        ) : meals.length === 0 ? (
+          <EmptyState
+            title="No featured recipes yet"
+            description="We could not load inspiration meals right now. Try browsing the full recipe archive."
+            actionText="Browse All Recipes"
+            onAction={() => navigate('/recipes')}
+          />
         ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
             {meals.map((meal) => (

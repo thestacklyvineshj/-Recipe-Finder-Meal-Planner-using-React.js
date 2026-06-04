@@ -18,6 +18,8 @@ A modern React web app to discover recipes, save favourites, and build a **7-day
 - [How it works](#how-it-works)
 - [Data & persistence](#data--persistence)
 - [API usage](#api-usage)
+- [Screenshots](#screenshots)
+- [Features checklist](#features-checklist)
 - [Browser support](#browser-support)
 - [License](#license)
 
@@ -164,8 +166,9 @@ recipe-finder-&-meal-planner/
 │   │   ├── RecipeDetail.tsx
 │   │   ├── Favourites.tsx
 │   │   └── MealPlanner.tsx
-│   ├── components/         # Reusable UI (Navbar, MealCard, SearchBar, etc.)
-│   ├── context/            # AppProvider + reducer (global state)
+│   ├── components/         # Reusable UI (Navbar, MealCard, RecipeCard, SearchBar, etc.)
+│   ├── layouts/            # RecipesLayout (nested /recipes outlet)
+│   ├── context/            # AppProvider + filterReducer (global state)
 │   ├── hooks/              # useMeals, useFavourites, useLocalStorage
 │   └── utils/
 │       ├── api.ts          # TheMealDB fetch helpers
@@ -230,6 +233,59 @@ Examples used in the app:
 - `categories.php` / `list.php?a=list` — categories and areas  
 
 See [TheMealDB API documentation](https://www.themealdb.com/api.php) for full details.
+
+---
+
+## Screenshots
+
+| Page | Preview |
+|------|---------|
+| Home | ![Home page](docs/screenshots/home.png) |
+| Recipes listing | ![Recipes listing](docs/screenshots/recipes.png) |
+| Recipe detail | ![Recipe detail](docs/screenshots/recipe-detail.png) |
+| Weekly meal planner | ![Meal planner](docs/screenshots/meal-planner.png) |
+
+To recapture screenshots locally (dev server must be running on port 3000):
+
+```bash
+npx playwright install chromium
+node scripts/capture-screenshots.mjs
+```
+
+---
+
+## Features checklist
+
+### Must have
+
+| Feature | Status |
+|---------|--------|
+| 5 pages via React Router v6 | Done |
+| Nested routes (`Layout` + `/recipes` child routes) | Done |
+| Context API + `useReducer` (filters) + `useLocalStorage` (persisted state) | Done |
+| Recipe search by name | Done |
+| Search by ingredient | Done |
+| Filter by category | Done |
+| Filter by area / cuisine | Done |
+| Pagination (12 recipes per page) | Done |
+| Recipe detail (ingredients, instructions, tags) | Done |
+| Favourites add / remove | Done |
+| 7-day meal planner (Breakfast / Lunch / Dinner) | Done |
+| `localStorage` persistence (favourites, meal plan, theme) | Done |
+| Loading, error, and empty states | Done |
+
+### Good to have
+
+| Feature | Status |
+|---------|--------|
+| Dark / light mode (context + `localStorage`) | Done |
+| YouTube embed + external link on detail page | Done |
+| Skeleton loaders (`Loader` card-grid / detail) | Done |
+| Print-friendly weekly meal plan | Done |
+| Responsive mobile navigation | Done |
+| Animated transitions (Motion) | Done |
+| `useFavourites` custom hook | Done |
+| `RecipeCard` alias (`MealCard`) | Done |
 
 ---
 

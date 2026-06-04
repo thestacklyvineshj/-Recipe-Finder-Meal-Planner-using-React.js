@@ -91,8 +91,8 @@ export const MealPlanGrid: React.FC<MealPlanGridProps> = ({ onPrint }) => {
         </div>
       </div>
 
-      {/* MOBILE LAYOUT: Day Tabs Selection row */}
-      <div className="block lg:hidden">
+      {/* MOBILE LAYOUT: Day Tabs Selection row (hidden when printing) */}
+      <div className="block lg:hidden print:hidden">
         <div className="flex gap-1 overflow-x-auto pb-2 scrollbar-none snap-x -mx-4 px-4">
           {DAYS_OF_WEEK.map((day) => {
             const plannedSlotsCount = MEAL_SLOTS.filter(s => mealPlan[day][s] !== null).length;
@@ -149,8 +149,8 @@ export const MealPlanGrid: React.FC<MealPlanGridProps> = ({ onPrint }) => {
         </div>
       </div>
 
-      {/* DESKTOP LAYOUT: 7 Column Grid View */}
-      <div className="hidden lg:grid lg:grid-cols-7 gap-4">
+      {/* DESKTOP LAYOUT: 7 Column Grid View (always shown when printing) */}
+      <div className="hidden lg:grid lg:grid-cols-7 gap-4 print:grid print:grid-cols-7">
         {DAYS_OF_WEEK.map((day) => (
           <div
             key={day}

@@ -8,43 +8,38 @@ import { MealCard } from '../components/MealCard';
 import { Loader } from '../components/Loader';
 import { EmptyState } from '../components/EmptyState';
 import { Pagination } from '../components/Pagination';
-import { Filter, SlidersHorizontal, Layers, Orbit } from 'lucide-react';
-import { mealApi } from '../utils/api';
+import { Filter, SlidersHorizontal } from 'lucide-react';
 
 export const Recipes: React.FC = () => {
   const [searchParams, setSearchParams] = useSearchParams();
-  const { theme } = useApp();
+  const { activeCategory, activeArea, setFilters } = useApp();
 
   const urlSearch = searchParams.get('search') || '';
   const urlCategory = searchParams.get('category') || '';
   const urlArea = searchParams.get('area') || '';
   const urlIngredient = searchParams.get('ingredient') || '';
 
-  // Hooks & States
   const {
     meals,
-    setMeals,
     categories,
     areas,
     loading,
     error,
     searchMeals,
+    searchMealsByIngredient,
     fetchFilteredMeals
   } = useMeals();
 
-  const [localSearch, setLocalSearch] = useState(urlSearch);
-  const [searchType, setSearchType] = useState<'name' | 'ingredient'>(urlIngredient ? 'ingredient' : 'name');
+  const [localSearch, setLocalSearch] = useState(urlSearch || urlIngredient);
+  const [searchType, setSearchType] = useState<'name' | 'ingredient'>(
+    urlIngredient ? 'ingredient' : 'name'
+  );
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 12;
 
-  // Track filter search inputs
-  const [selectedCat, setSelectedCat] = useState(urlCategory);
-  const [selectedArea, setSelectedArea] = useState(urlArea);
-
-  // Sync state from query parameters on mount or when url changes
+  // Sync URL params → Context filters
   useEffect(() => {
-    setSelectedCat(urlCategory);
-    setSelectedArea(urlArea);
+    setFilters(urlCategory, urlArea);
     if (urlIngredient) {
       setLocalSearch(urlIngredient);
       setSearchType('ingredient');
@@ -53,94 +48,80 @@ export const Recipes: React.FC = () => {
       setSearchType('name');
     }
     setCurrentPage(1);
-  }, [urlCategory, urlArea, urlSearch, urlIngredient]);
+  }, [urlCategory, urlArea, urlSearch, urlIngredient, setFilters]);
 
   // Main data fetch coordinator
   useEffect(() => {
     const fetchRecipes = async () => {
-      // 1. If ingredient search is active
       if (searchType === 'ingredient' && localSearch) {
-        try {
-          const res = await mealApi.searchMealsByIngredient(localSearch);
-          setMeals(res);
-        } catch (err) {
-          console.error(err);
-        }
+        await searchMealsByIngredient(localSearch);
         return;
       }
-
-      // 2. If name search query is active
-      if (localSearch) {
-        searchMeals(localSearch);
+      if (localSearch && searchType === 'name') {
+        await searchMeals(localSearch);
         return;
       }
-
-      // 3. Otherwise fetch by Category + Area filters
-      fetchFilteredMeals(selectedCat, selectedArea);
+      await fetchFilteredMeals(activeCategory, activeArea);
     };
 
     fetchRecipes();
-  }, [localSearch, searchType, selectedCat, selectedArea, searchMeals, fetchFilteredMeals, setMeals]);
+  }, [
+    localSearch,
+    searchType,
+    activeCategory,
+    activeArea,
+    searchMeals,
+    searchMealsByIngredient,
+    fetchFilteredMeals
+  ]);
 
-  // Set Search Query
+  const updateUrlParams = (updates: Record<string, string | null>) => {
+    const newParams = new URLSearchParams(searchParams);
+    Object.entries(updates).forEach(([key, value]) => {
+      if (value) {
+        newParams.set(key, value);
+      } else {
+        newParams.delete(key);
+      }
+    });
+    setSearchParams(newParams);
+  };
+
   const handleSearchBarSubmit = (q: string, type: 'name' | 'ingredient') => {
     setCurrentPage(1);
     setLocalSearch(q);
     setSearchType(type);
 
-    const newParams = new URLSearchParams(searchParams);
     if (q) {
       if (type === 'ingredient') {
-        newParams.set('ingredient', q);
-        newParams.delete('search');
+        updateUrlParams({ ingredient: q, search: null });
       } else {
-        newParams.set('search', q);
-        newParams.delete('ingredient');
+        updateUrlParams({ search: q, ingredient: null });
       }
     } else {
-      newParams.delete('search');
-      newParams.delete('ingredient');
+      updateUrlParams({ search: null, ingredient: null });
     }
-    setSearchParams(newParams);
   };
 
-  // Set Category from subfilter row
   const handleCategoryChoice = (cat: string) => {
     setCurrentPage(1);
-    setSelectedCat(cat);
-    
-    const newParams = new URLSearchParams(searchParams);
-    if (cat) {
-      newParams.set('category', cat);
-    } else {
-      newParams.delete('category');
-    }
-    setSearchParams(newParams);
+    setFilters(cat, activeArea);
+    updateUrlParams({ category: cat || null });
   };
 
-  // Set Cuisine/Area choice
   const handleAreaChoice = (area: string) => {
     setCurrentPage(1);
-    setSelectedArea(area);
-
-    const newParams = new URLSearchParams(searchParams);
-    if (area) {
-      newParams.set('area', area);
-    } else {
-      newParams.delete('area');
-    }
-    setSearchParams(newParams);
+    setFilters(activeCategory, area);
+    updateUrlParams({ area: area || null });
   };
 
   const handleResetAll = () => {
     setLocalSearch('');
-    setSelectedCat('');
-    setSelectedArea('');
+    setFilters('', '');
     setSearchParams({});
     setCurrentPage(1);
   };
 
-  // Client side pagination calculations
   const paginatedMeals = useMemo(() => {
     const start = (currentPage - 1) * itemsPerPage;
     return meals.slice(start, start + itemsPerPage);
@@ -148,7 +129,6 @@ export const Recipes: React.FC = () => {
 
   return (
     <div className="space-y-8 pb-16" id="recipes-listing-page">
-      {/* Title block banner */}
       <section className="space-y-2 border-b border-zinc-150 dark:border-zinc-800 pb-5">
         <h1 className="font-heading font-extrabold text-2xl sm:text-4xl text-zinc-900 dark:text-white tracking-tight flex items-center gap-2">
           <Filter className="w-6 h-6 text-amber-500" />
@@ -159,7 +139,6 @@ export const Recipes: React.FC = () => {
         </p>
       </section>
 
-      {/* Main Search Row Panel */}
       <section className="bg-zinc-50 dark:bg-zinc-900/30 border border-zinc-200/50 dark:border-zinc-800 rounded-3xl p-5 md:p-6 shadow-sm space-y-6">
         <div className="flex items-center gap-2 border-b border-zinc-200/50 dark:border-zinc-805/60 pb-3">
           <SlidersHorizontal className="w-4 h-4 text-amber-500" />
@@ -177,17 +156,16 @@ export const Recipes: React.FC = () => {
         {searchType === 'name' && (
           <CategoryFilter
             categories={categories}
-            selectedCategory={selectedCat}
+            selectedCategory={activeCategory}
             onSelectCategory={handleCategoryChoice}
             areas={areas}
-            selectedArea={selectedArea}
+            selectedArea={activeArea}
             onSelectArea={handleAreaChoice}
             showAreaFilter
           />
         )}
       </section>
 
-      {/* Results Section */}
       <section className="space-y-6" id="meals-results-section">
         <div className="flex items-center justify-between">
           <h2 className="text-sm font-extrabold text-zinc-450 dark:text-zinc-500 uppercase tracking-widest">
@@ -228,7 +206,6 @@ export const Recipes: React.FC = () => {
               currentPage={currentPage}
               onPageChange={(page) => {
                 setCurrentPage(page);
-                // Scroll to top of listing smoothly on page turn
                 window.scrollTo({ top: 320, behavior: 'smooth' });
               }}
             />

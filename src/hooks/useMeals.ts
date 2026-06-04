@@ -49,6 +49,22 @@ export function useMeals() {
   }, []);
 
   /**
+   * Search meals by single ingredient
+   */
+  const searchMealsByIngredient = useCallback(async (ingredient: string) => {
+    setLoading(true);
+    setError(null);
+    try {
+      const results = await mealApi.searchMealsByIngredient(ingredient);
+      setMeals(results);
+    } catch (err) {
+      setError('Failed to search by ingredient. Please try again.');
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
+  /**
    * Fetch structured combined multi-filter categories/area recipes
    */
   const fetchFilteredMeals = useCallback(async (category: string, area: string) => {
@@ -73,15 +89,8 @@ export function useMeals() {
     try {
       // Sometimes standard queries return a fuller set of instructions, so let's try getting some common meals,
       // fallback to random if needed
-      const results = await mealApi.searchMealsByName('');
-      if (results && results.length > 0) {
-        // Shuffle and slice
-        const shuffled = [...results].sort(() => 0.5 - Math.random());
-        setMeals(shuffled.slice(0, count));
-      } else {
-        const randoms = await mealApi.getRandomMeals(count);
-        setMeals(randoms);
-      }
+      const randoms = await mealApi.getRandomMeals(count);
+      setMeals(randoms);
     } catch (err) {
       setError('Failed to load featured recipes.');
     } finally {
@@ -97,6 +106,7 @@ export function useMeals() {
     loading,
     error,
     searchMeals,
+    searchMealsByIngredient,
     fetchFilteredMeals,
     fetchFeaturedMeals
   };

@@ -1,13 +1,13 @@
 import React from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { useApp } from '../context/AppContext';
+import { useFavourites } from '../hooks/useFavourites';
 import { MealCard } from '../components/MealCard';
 import { EmptyState } from '../components/EmptyState';
 import { Heart, Search, ListFilter } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 
 export const Favourites: React.FC = () => {
-  const { favourites } = useApp();
+  const { favourites } = useFavourites();
   const navigate = useNavigate();
 
   return (

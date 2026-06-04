@@ -1,11 +1,16 @@
 import React, { createContext, useContext, useReducer, useEffect, ReactNode } from 'react';
-import { AppState, Meal, PlannedMeal, DayOfWeek, MealSlot, ThemeMode, WeeklyMealPlan } from '../types';
-import { AppReducer, createEmptyMealPlan } from './AppReducer';
-import { getStorageItem, setStorageItem } from '../utils/localStorage';
+import {
+  AppState,
+  Meal,
+  PlannedMeal,
+  DayOfWeek,
+  MealSlot,
+  ThemeMode,
+  WeeklyMealPlan
+} from '../types';
+import { filterReducer, createEmptyMealPlan } from './AppReducer';
+import { useLocalStorage } from '../hooks/useLocalStorage';
 
-/**
- * Interface representing context API
- */
 export interface AppContextType extends AppState {
   addFavourite: (meal: Meal) => void;
   removeFavourite: (idMeal: string) => void;
@@ -17,6 +22,7 @@ export interface AppContextType extends AppState {
   setActiveArea: (area: string) => void;
   setFilters: (category: string, area: string) => void;
   toggleTheme: () => void;
+  setTheme: (mode: ThemeMode) => void;
 }
 
 const AppContext = createContext<AppContextType | undefined>(undefined);
@@ -25,72 +31,48 @@ interface AppProviderProps {
   children: ReactNode;
 }
 
-const INITIAL_STATE: AppState = {
-  favourites: [],
-  mealPlan: createEmptyMealPlan(),
-  activeCategory: '',
-  activeArea: '',
-  theme: 'light'
-};
+function getInitialTheme(): ThemeMode {
+  if (typeof window === 'undefined') return 'light';
+  const stored = localStorage.getItem('theme') as ThemeMode | null;
+  if (stored === 'light' || stored === 'dark') return stored;
+  if (window.matchMedia('(prefers-color-scheme: dark)').matches) return 'dark';
+  return 'light';
+}
 
 export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
-  // Initialize state with localStorage values
-  const [state, dispatch] = useReducer(AppReducer, INITIAL_STATE, () => {
-    const favourites = getStorageItem<Meal[]>('favourites', []);
-    const mealPlan = getStorageItem<WeeklyMealPlan>('mealPlan', createEmptyMealPlan());
-    
-    // Theme initialization
-    let initialTheme: ThemeMode = 'light';
-    if (typeof window !== 'undefined') {
-      const storedTheme = localStorage.getItem('theme') as ThemeMode | null;
-      if (storedTheme === 'light' || storedTheme === 'dark') {
-        initialTheme = storedTheme;
-      } else if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
-        initialTheme = 'dark';
-      }
-    }
-
-    return {
-      favourites,
-      mealPlan,
-      activeCategory: '',
-      activeArea: '',
-      theme: initialTheme
-    };
+  const [favourites, setFavourites] = useLocalStorage<Meal[]>('favourites', []);
+  const [mealPlan, setMealPlan] = useLocalStorage<WeeklyMealPlan>(
+    'mealPlan',
+    createEmptyMealPlan()
+  );
+  const [theme, setTheme] = useLocalStorage<ThemeMode>('theme', getInitialTheme());
+  const [filterState, dispatch] = useReducer(filterReducer, {
+    activeCategory: '',
+    activeArea: ''
   });
 
-  // Sync state to localStorage of favourites, mealPlan, and theme
   useEffect(() => {
-    setStorageItem('favourites', state.favourites);
-  }, [state.favourites]);
-
-  useEffect(() => {
-    setStorageItem('mealPlan', state.mealPlan);
-  }, [state.mealPlan]);
-
-  useEffect(() => {
-    localStorage.setItem('theme', state.theme);
-    
-    // Apply styling class to html/documentElement
     const root = window.document.documentElement;
-    if (state.theme === 'dark') {
+    if (theme === 'dark') {
       root.classList.add('dark');
     } else {
       root.classList.remove('dark');
     }
-  }, [state.theme]);
+  }, [theme]);
 
-  // Actions
   const addFavourite = (meal: Meal) => {
-    dispatch({ type: 'ADD_FAVOURITE', payload: meal });
+    setFavourites((prev) => {
+      if (prev.some((item) => item.idMeal === meal.idMeal)) return prev;
+      return [...prev, meal];
+    });
   };
 
   const removeFavourite = (idMeal: string) => {
-    dispatch({ type: 'REMOVE_FAVOURITE', payload: idMeal });
+    setFavourites((prev) => prev.filter((item) => item.idMeal !== idMeal));
   };
 
   const toggleFavourite = (meal: Meal) => {
-    const exists = state.favourites.some((item) => item.idMeal === meal.idMeal);
+    const exists = favourites.some((item) => item.idMeal === meal.idMeal);
     if (exists) {
       removeFavourite(meal.idMeal);
     } else {
@@ -99,15 +81,18 @@ export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
   };
 
   const isFavourite = (idMeal: string): boolean => {
-    return state.favourites.some((item) => item.idMeal === idMeal);
+    return favourites.some((item) => item.idMeal === idMeal);
   };
 
-  const setMealPlan = (day: DayOfWeek, slot: MealSlot, meal: PlannedMeal | null) => {
-    dispatch({ type: 'SET_MEAL_PLAN', payload: { day, slot, meal } });
+  const setMealPlanSlot = (day: DayOfWeek, slot: MealSlot, meal: PlannedMeal | null) => {
+    setMealPlan((prev) => ({
+      ...prev,
+      [day]: { ...prev[day], [slot]: meal }
+    }));
   };
 
   const clearMealPlan = () => {
-    dispatch({ type: 'CLEAR_MEAL_PLAN' });
+    setMealPlan(createEmptyMealPlan());
   };
 
   const setActiveCategory = (category: string) => {
@@ -123,23 +108,28 @@ export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
   };
 
   const toggleTheme = () => {
-    dispatch({ type: 'TOGGLE_THEME' });
+    setTheme((prev) => (prev === 'light' ? 'dark' : 'light'));
   };
 
   return (
     <AppContext.Provider
       value={{
-        ...state,
+        favourites,
+        mealPlan,
+        theme,
+        activeCategory: filterState.activeCategory,
+        activeArea: filterState.activeArea,
         addFavourite,
         removeFavourite,
         toggleFavourite,
         isFavourite,
-        setMealPlan,
+        setMealPlan: setMealPlanSlot,
         clearMealPlan,
         setActiveCategory,
         setActiveArea,
         setFilters,
-        toggleTheme
+        toggleTheme,
+        setTheme
       }}
     >
       {children}
@@ -147,7 +137,6 @@ export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
   );
 };
 
-// Custom Hook to consume AppContext
 export const useApp = () => {
   const context = useContext(AppContext);
   if (context === undefined) {

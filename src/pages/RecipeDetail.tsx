@@ -3,6 +3,7 @@ import { useParams, useNavigate, Link } from 'react-router-dom';
 import { Heart, Calendar, CheckSquare, Youtube, Clock, ArrowLeft, Plus, BookmarkCheck, Utensils, RefreshCw, ChefHat } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { useApp } from '../context/AppContext';
+import { useFavourites } from '../hooks/useFavourites';
 import { mealApi } from '../utils/api';
 import { Meal, DayOfWeek, MealSlot } from '../types';
 import { DAYS_OF_WEEK, MEAL_SLOTS } from '../utils/constants';
@@ -11,7 +12,8 @@ import { Loader } from '../components/Loader';
 export const RecipeDetail: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
-  const { isFavourite, toggleFavourite, setMealPlan } = useApp();
+  const { isFavourite, toggleFavourite } = useFavourites();
+  const { setMealPlan } = useApp();
 
   const [meal, setMeal] = useState<Meal | null>(null);
   const [loading, setLoading] = useState(true);
@@ -264,22 +266,34 @@ export const RecipeDetail: React.FC = () => {
           </div>
 
           {/* YouTube Video Embed Tutorial If Available */}
-          {ytEmbedUrl && (
+          {meal.strYoutube && (
             <div className="bg-zinc-50 dark:bg-zinc-950/40 p-4 border border-zinc-200/55 dark:border-zinc-800 rounded-3xl space-y-3">
-              <h3 className="font-heading font-extrabold text-sm text-zinc-850 dark:text-zinc-150 flex items-center gap-2">
-                <Youtube className="w-5 h-5 text-red-500" />
-                <span>Video Cooking Walkthrough</span>
-              </h3>
-              <div className="relative overflow-hidden rounded-2xl aspect-video border border-zinc-200/40 dark:border-zinc-800">
-                <iframe
-                  src={ytEmbedUrl}
-                  title={`${meal.strMeal} Tutorial video`}
-                  frameBorder="0"
-                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                  allowFullScreen
-                  className="absolute top-0 left-0 w-full h-full"
-                ></iframe>
+              <div className="flex items-center justify-between gap-2">
+                <h3 className="font-heading font-extrabold text-sm text-zinc-850 dark:text-zinc-150 flex items-center gap-2">
+                  <Youtube className="w-5 h-5 text-red-500" />
+                  <span>Video Cooking Walkthrough</span>
+                </h3>
+                <a
+                  href={meal.strYoutube}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-xs font-bold text-red-500 hover:text-red-600 hover:underline shrink-0"
+                >
+                  Watch on YouTube
+                </a>
               </div>
+              {ytEmbedUrl && (
+                <div className="relative overflow-hidden rounded-2xl aspect-video border border-zinc-200/40 dark:border-zinc-800">
+                  <iframe
+                    src={ytEmbedUrl}
+                    title={`${meal.strMeal} Tutorial video`}
+                    frameBorder="0"
+                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                    allowFullScreen
+                    className="absolute top-0 left-0 w-full h-full"
+                  ></iframe>
+                </div>
+              )}
             </div>
           )}
         </div>

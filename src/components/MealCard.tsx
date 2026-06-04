@@ -4,6 +4,7 @@ import { Heart, Calendar, Plus, ChevronDown, CheckCheck, Trash2 } from 'lucide-r
 import { motion, AnimatePresence } from 'motion/react';
 import { Meal, DayOfWeek, MealSlot } from '../types';
 import { useApp } from '../context/AppContext';
+import { useFavourites } from '../hooks/useFavourites';
 import { DAYS_OF_WEEK, MEAL_SLOTS } from '../utils/constants';
 
 interface MealCardProps {
@@ -16,7 +17,8 @@ export const MealCard: React.FC<MealCardProps> = ({
   showRemoveFavouriteOnly = false
 }) => {
   const { idMeal, strMeal, strMealThumb, strCategory, strArea } = meal;
-  const { isFavourite, toggleFavourite, setMealPlan, removeFavourite } = useApp();
+  const { isFavourite, toggleFavourite, removeFavourite } = useFavourites();
+  const { setMealPlan } = useApp();
   const [isPlanning, setIsPlanning] = useState(false);
   const [selectedDay, setSelectedDay] = useState<DayOfWeek>('Monday');
   const [selectedSlot, setSelectedSlot] = useState<MealSlot>('Breakfast');
