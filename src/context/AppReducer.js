@@ -64,17 +64,24 @@ export const appReducer = (state, action) => {
       return { ...state, mealPlan: createEmptyMealPlan() };
 
     case 'SET_CATEGORY':
+      if (state.selectedCategory === action.payload) return state;
       return { ...state, selectedCategory: action.payload };
 
     case 'SET_AREA':
+      if (state.selectedArea === action.payload) return state;
       return { ...state, selectedArea: action.payload };
 
-    case 'SET_FILTERS':
+    case 'SET_FILTERS': {
+      const { category, area } = action.payload;
+      if (state.selectedCategory === category && state.selectedArea === area) {
+        return state;
+      }
       return {
         ...state,
-        selectedCategory: action.payload.category,
-        selectedArea: action.payload.area
+        selectedCategory: category,
+        selectedArea: area
       };
+    }
 
     case 'TOGGLE_THEME':
       return { ...state, theme: state.theme === 'light' ? 'dark' : 'light' };

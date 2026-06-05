@@ -15,11 +15,13 @@ export const MealPlanGrid = ({ onPrint }) => {
   const [searchQuery, setSearchQuery] = useState('');
   const [searchResults, setSearchResults] = useState([]);
   const [searching, setSearching] = useState(false);
+  const [searchError, setSearchError] = useState(null);
 
   const handleOpenSelector = (day, slot) => {
     setSelectorTarget({ day, slot });
     setSearchQuery('');
     setSearchResults([]);
+    setSearchError(null);
   };
 
   const handleCloseSelector = () => {
@@ -31,11 +33,13 @@ export const MealPlanGrid = ({ onPrint }) => {
     if (!searchQuery.trim()) return;
 
     setSearching(true);
+    setSearchError(null);
     try {
       const results = await mealApi.searchMealsByName(searchQuery.trim());
       setSearchResults(results);
     } catch (err) {
-      console.error('Error searching meals for planner:', err);
+      setSearchResults([]);
+      setSearchError('Failed to search recipes. Please try again.');
     } finally {
       setSearching(false);
     }
@@ -332,6 +336,10 @@ export const MealPlanGrid = ({ onPrint }) => {
                         </button>
                       ))}
                     </div>
+                  ) : searchError ? (
+                    <p className="text-xs text-center text-red-500 dark:text-red-400 py-3 font-semibold">
+                      {searchError}
+                    </p>
                   ) : searchQuery && (
                     <p className="text-xs text-center text-zinc-500 dark:text-zinc-400 py-3">
                       No matching results found.

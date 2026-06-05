@@ -3,6 +3,7 @@ import { Search, X, ChefHat } from 'lucide-react';
 
 export const SearchBar = ({
   onSearch,
+  onSearchTypeChange,
   initialValue = '',
   initialSearchType = 'name',
   placeholder = 'Search recipes by name...'
@@ -56,7 +57,7 @@ export const SearchBar = ({
             type="button"
             onClick={() => {
               setSearchType('name');
-              onSearch(query.trim(), 'name');
+              onSearchTypeChange?.('name');
             }}
             className={`px-3 py-2 text-xs font-semibold rounded-xl transition duration-150 ${
               searchType === 'name'
@@ -70,7 +71,7 @@ export const SearchBar = ({
             type="button"
             onClick={() => {
               setSearchType('ingredient');
-              onSearch(query.trim(), 'ingredient');
+              onSearchTypeChange?.('ingredient');
             }}
             className={`px-3 py-2 text-xs font-semibold rounded-xl transition duration-150 ${
               searchType === 'ingredient'

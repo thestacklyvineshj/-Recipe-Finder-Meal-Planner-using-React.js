@@ -1,4 +1,4 @@
-import { createContext, useContext, useReducer, useEffect } from 'react';
+import { createContext, useContext, useReducer, useEffect, useCallback } from 'react';
 import { appReducer, createEmptyMealPlan, initialAppState } from './AppReducer';
 import { getStorageItem, setStorageItem } from '../utils/localStorage';
 
@@ -48,55 +48,86 @@ export const AppProvider = ({ children }) => {
     }
   }, [state.theme]);
 
-  const addFavourite = (meal) => dispatch({ type: 'ADD_FAVOURITE', payload: meal });
+  const addFavourite = useCallback(
+    (meal) => dispatch({ type: 'ADD_FAVOURITE', payload: meal }),
+    []
+  );
 
-  const removeFavourite = (idMeal) => dispatch({ type: 'REMOVE_FAVOURITE', payload: idMeal });
+  const removeFavourite = useCallback(
+    (idMeal) => dispatch({ type: 'REMOVE_FAVOURITE', payload: idMeal }),
+    []
+  );
 
-  const toggleFavourite = (meal) => {
-    if (state.favourites.some((m) => m.idMeal === meal.idMeal)) {
-      removeFavourite(meal.idMeal);
-    } else {
-      addFavourite(meal);
-    }
-  };
+  const toggleFavourite = useCallback(
+    (meal) => {
+      if (state.favourites.some((m) => m.idMeal === meal.idMeal)) {
+        dispatch({ type: 'REMOVE_FAVOURITE', payload: meal.idMeal });
+      } else {
+        dispatch({ type: 'ADD_FAVOURITE', payload: meal });
+      }
+    },
+    [state.favourites]
+  );
 
-  const isFavourite = (idMeal) => state.favourites.some((m) => m.idMeal === idMeal);
+  const isFavourite = useCallback(
+    (idMeal) => state.favourites.some((m) => m.idMeal === idMeal),
+    [state.favourites]
+  );
 
-  const addMeal = (day, slot, meal) =>
-    dispatch({ type: 'ADD_MEAL', payload: { day, slot, meal } });
+  const addMeal = useCallback(
+    (day, slot, meal) => dispatch({ type: 'ADD_MEAL', payload: { day, slot, meal } }),
+    []
+  );
 
-  const replaceMeal = (day, slot, meal) =>
-    dispatch({ type: 'REPLACE_MEAL', payload: { day, slot, meal } });
+  const replaceMeal = useCallback(
+    (day, slot, meal) => dispatch({ type: 'REPLACE_MEAL', payload: { day, slot, meal } }),
+    []
+  );
 
-  const removeMeal = (day, slot) =>
-    dispatch({ type: 'REMOVE_MEAL', payload: { day, slot } });
+  const removeMeal = useCallback(
+    (day, slot) => dispatch({ type: 'REMOVE_MEAL', payload: { day, slot } }),
+    []
+  );
 
-  const setMealPlan = (day, slot, meal) => {
-    if (meal === null) {
-      removeMeal(day, slot);
-      return;
-    }
-    const existing = state.mealPlan[day]?.[slot];
-    if (existing) {
-      replaceMeal(day, slot, meal);
-    } else {
-      addMeal(day, slot, meal);
-    }
-  };
+  const setMealPlan = useCallback(
+    (day, slot, meal) => {
+      if (meal === null) {
+        dispatch({ type: 'REMOVE_MEAL', payload: { day, slot } });
+        return;
+      }
+      const existing = state.mealPlan[day]?.[slot];
+      if (existing) {
+        dispatch({ type: 'REPLACE_MEAL', payload: { day, slot, meal } });
+      } else {
+        dispatch({ type: 'ADD_MEAL', payload: { day, slot, meal } });
+      }
+    },
+    [state.mealPlan]
+  );
 
-  const clearMealPlan = () => dispatch({ type: 'CLEAR_MEAL_PLAN' });
+  const clearMealPlan = useCallback(() => dispatch({ type: 'CLEAR_MEAL_PLAN' }), []);
 
-  const setSelectedCategory = (category) =>
-    dispatch({ type: 'SET_CATEGORY', payload: category });
+  const setSelectedCategory = useCallback(
+    (category) => dispatch({ type: 'SET_CATEGORY', payload: category }),
+    []
+  );
 
-  const setSelectedArea = (area) => dispatch({ type: 'SET_AREA', payload: area });
+  const setSelectedArea = useCallback(
+    (area) => dispatch({ type: 'SET_AREA', payload: area }),
+    []
+  );
 
-  const setFilters = (category, area) =>
-    dispatch({ type: 'SET_FILTERS', payload: { category, area } });
+  const setFilters = useCallback(
+    (category, area) => dispatch({ type: 'SET_FILTERS', payload: { category, area } }),
+    []
+  );
 
-  const toggleTheme = () => dispatch({ type: 'TOGGLE_THEME' });
+  const toggleTheme = useCallback(() => dispatch({ type: 'TOGGLE_THEME' }), []);
 
-  const setTheme = (mode) => dispatch({ type: 'SET_THEME', payload: mode });
+  const setTheme = useCallback(
+    (mode) => dispatch({ type: 'SET_THEME', payload: mode }),
+    []
+  );
 
   return (
     <AppContext.Provider

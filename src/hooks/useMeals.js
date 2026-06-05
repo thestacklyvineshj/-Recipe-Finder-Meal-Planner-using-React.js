@@ -1,5 +1,15 @@
-import { useState, useEffect, useCallback } from 'react';
-import { mealApi } from '../utils/api';
+import { useState, useEffect, useCallback, useRef } from 'react';
+import { mealApi, ApiError } from '../utils/api';
+
+function getErrorMessage(err, fallback) {
+  if (err instanceof ApiError) {
+    if (err.message.includes('timed out') || err.message.includes('cancelled')) {
+      return 'Request timed out. Please try again.';
+    }
+    return err.message;
+  }
+  return fallback;
+}
 
 export function useMeals() {
   const [meals, setMeals] = useState([]);
@@ -7,95 +17,96 @@ export function useMeals() {
   const [areas, setAreas] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
+  const [filtersError, setFiltersError] = useState(null);
+  const fetchAbortRef = useRef(null);
 
-  // Load basic filters like Categories and Areas on mount
+  const runFetch = useCallback(async (fetcher, fallbackMessage) => {
+    fetchAbortRef.current?.abort();
+    const controller = new AbortController();
+    fetchAbortRef.current = controller;
+
+    setLoading(true);
+    setError(null);
+
+    try {
+      const results = await fetcher(controller.signal);
+      if (!controller.signal.aborted) {
+        setMeals(results);
+      }
+    } catch (err) {
+      if (!controller.signal.aborted) {
+        setError(getErrorMessage(err, fallbackMessage));
+      }
+    } finally {
+      if (!controller.signal.aborted) {
+        setLoading(false);
+      }
+    }
+  }, []);
+
   useEffect(() => {
-    let active = true;
+    const controller = new AbortController();
+
     const loadFilters = async () => {
       try {
         const [cats, ars] = await Promise.all([
-          mealApi.getAllCategories(),
-          mealApi.getAllAreas()
+          mealApi.getAllCategories({ signal: controller.signal }),
+          mealApi.getAllAreas({ signal: controller.signal })
         ]);
-        if (active) {
+        if (!controller.signal.aborted) {
           setCategories(cats);
           setAreas(ars);
+          setFiltersError(null);
         }
       } catch (err) {
-        console.error('Failed to load categories/areas:', err);
+        if (!controller.signal.aborted) {
+          setFiltersError(getErrorMessage(err, 'Failed to load filters.'));
+        }
       }
     };
+
     loadFilters();
     return () => {
-      active = false;
+      controller.abort();
+      fetchAbortRef.current?.abort();
     };
   }, []);
 
-  /**
-   * Search meals by search term
-   */
-  const searchMeals = useCallback(async (query) => {
-    setLoading(true);
-    setError(null);
-    try {
-      const results = await mealApi.searchMealsByName(query);
-      setMeals(results);
-    } catch (err) {
-      setError('Failed to search recipes. Please try again.');
-    } finally {
-      setLoading(false);
-    }
-  }, []);
+  const searchMeals = useCallback(
+    (query) =>
+      runFetch(
+        (signal) => mealApi.searchMealsByName(query, { signal }),
+        'Failed to search recipes. Please try again.'
+      ),
+    [runFetch]
+  );
 
-  /**
-   * Search meals by single ingredient
-   */
-  const searchMealsByIngredient = useCallback(async (ingredient) => {
-    setLoading(true);
-    setError(null);
-    try {
-      const results = await mealApi.searchMealsByIngredient(ingredient);
-      setMeals(results);
-    } catch (err) {
-      setError('Failed to search by ingredient. Please try again.');
-    } finally {
-      setLoading(false);
-    }
-  }, []);
+  const searchMealsByIngredient = useCallback(
+    (ingredient) =>
+      runFetch(
+        (signal) => mealApi.searchMealsByIngredient(ingredient, { signal }),
+        'Failed to search by ingredient. Please try again.'
+      ),
+    [runFetch]
+  );
 
-  /**
-   * Fetch structured combined multi-filter categories/area recipes
-   */
-  const fetchFilteredMeals = useCallback(async (category, area) => {
-    setLoading(true);
-    setError(null);
-    try {
-      const results = await mealApi.getFilteredRecipes(category, area);
-      setMeals(results);
-    } catch (err) {
-      setError('Failed to fetch recipes. Please check your internet connection.');
-    } finally {
-      setLoading(false);
-    }
-  }, []);
+  const fetchFilteredMeals = useCallback(
+    (category, area) =>
+      runFetch(
+        (signal) => mealApi.getFilteredRecipes(category, area, { signal }),
+        'Failed to fetch recipes. Please check your internet connection.'
+      ),
+    [runFetch]
+  );
 
-  /**
-   * Load some random meals for featured grid
-   */
-  const fetchFeaturedMeals = useCallback(async (count = 6) => {
-    setLoading(true);
-    setError(null);
-    try {
-      // Sometimes standard queries return a fuller set of instructions, so let's try getting some common meals,
-      // fallback to random if needed
-      const randoms = await mealApi.getRandomMeals(count);
-      setMeals(randoms);
-    } catch (err) {
-      setError('Failed to load featured recipes.');
-    } finally {
-      setLoading(false);
-    }
-  }, []);
+  const fetchFeaturedMeals = useCallback(
+    (count = 6) =>
+      runFetch(
+        (signal) => mealApi.getRandomMeals(count, { signal }),
+        'Failed to load featured recipes.'
+      ),
+    [runFetch]
+  );
 
   return {
     meals,
@@ -104,6 +115,7 @@ export function useMeals() {
     areas,
     loading,
     error,
+    filtersError,
     searchMeals,
     searchMealsByIngredient,
     fetchFilteredMeals,

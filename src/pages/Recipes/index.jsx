@@ -25,6 +25,7 @@ export const Recipes = () => {
     areas,
     loading,
     error,
+    filtersError,
     searchMeals,
     searchMealsByIngredient,
     fetchFilteredMeals
@@ -37,9 +38,10 @@ export const Recipes = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 12;
 
-  // Sync URL params → Context filters
+  // Sync URL params → local UI state and context filters
   useEffect(() => {
     setFilters(urlCategory, urlArea);
+
     if (urlIngredient) {
       setLocalSearch(urlIngredient);
       setSearchType('ingredient');
@@ -47,29 +49,30 @@ export const Recipes = () => {
       setLocalSearch(urlSearch);
       setSearchType('name');
     }
+
     setCurrentPage(1);
   }, [urlCategory, urlArea, urlSearch, urlIngredient, setFilters]);
 
-  // Main data fetch coordinator
+  // Fetch recipes directly from URL params (avoids stale context race)
   useEffect(() => {
     const fetchRecipes = async () => {
-      if (searchType === 'ingredient' && localSearch) {
-        await searchMealsByIngredient(localSearch);
+      if (urlIngredient) {
+        await searchMealsByIngredient(urlIngredient);
         return;
       }
-      if (localSearch && searchType === 'name') {
-        await searchMeals(localSearch);
+      if (urlSearch) {
+        await searchMeals(urlSearch);
         return;
       }
-      await fetchFilteredMeals(selectedCategory, selectedArea);
+      await fetchFilteredMeals(urlCategory, urlArea);
     };
 
     fetchRecipes();
   }, [
-    localSearch,
-    searchType,
-    selectedCategory,
-    selectedArea,
+    urlCategory,
+    urlArea,
+    urlSearch,
+    urlIngredient,
     searchMeals,
     searchMealsByIngredient,
     fetchFilteredMeals
@@ -103,21 +106,22 @@ export const Recipes = () => {
     }
   };
 
+  const handleSearchTypeChange = (type) => {
+    setSearchType(type);
+  };
+
   const handleCategoryChoice = (cat) => {
     setCurrentPage(1);
-    setFilters(cat, selectedArea);
     updateUrlParams({ category: cat || null });
   };
 
   const handleAreaChoice = (area) => {
     setCurrentPage(1);
-    setFilters(selectedCategory, area);
     updateUrlParams({ area: area || null });
   };
 
   const handleResetAll = () => {
     setLocalSearch('');
-    setFilters('', '');
     setSearchParams({});
     setCurrentPage(1);
   };
@@ -147,8 +151,15 @@ export const Recipes = () => {
           </span>
         </div>
 
+        {filtersError && (
+          <p className="text-xs text-amber-600 dark:text-amber-400 font-semibold">
+            {filtersError} Category and area filters may be unavailable.
+          </p>
+        )}
+
         <SearchBar
           onSearch={handleSearchBarSubmit}
+          onSearchTypeChange={handleSearchTypeChange}
           initialValue={localSearch}
           initialSearchType={searchType}
           placeholder="Filter recipes by custom titles..."
@@ -179,9 +190,22 @@ export const Recipes = () => {
         </div>
 
         {error && !loading && (
-          <p className="text-center text-xs text-red-500 dark:text-red-400 font-semibold py-6">
-            {error}
-          </p>
+          <div className="text-center py-6 space-y-3">
+            <p className="text-xs text-red-500 dark:text-red-400 font-semibold">
+              {error}
+            </p>
+            <button
+              type="button"
+              onClick={() => {
+                if (urlIngredient) searchMealsByIngredient(urlIngredient);
+                else if (urlSearch) searchMeals(urlSearch);
+                else fetchFilteredMeals(urlCategory, urlArea);
+              }}
+              className="text-xs font-bold text-amber-500 hover:text-amber-600 hover:underline"
+            >
+              Try again
+            </button>
+          </div>
         )}
 
         {loading ? (

@@ -4,7 +4,7 @@ import { Heart, Calendar, CheckSquare, Youtube, Clock, ArrowLeft, Plus, Bookmark
 import { motion, AnimatePresence } from 'motion/react';
 import { useApp } from '../../context/AppContext';
 import { useFavourites } from '../../hooks/useFavourites';
-import { mealApi } from '../../utils/api';
+import { mealApi, ApiError } from '../../utils/api';
 import { DAYS_OF_WEEK, MEAL_SLOTS } from '../../utils/constants';
 import { Loader } from '../../components/Loader';
 
@@ -25,27 +25,40 @@ export const RecipeDetail = () => {
   const [plannedSuccess, setPlannedSuccess] = useState(false);
 
   // Checked ingredients tracker to assist the chef
-  const [checkedIngredients, setCheckedIngredients] = useState>({});
+  const [checkedIngredients, setCheckedIngredients] = useState({});
 
   useEffect(() => {
+    if (!id) return;
+
+    const controller = new AbortController();
+
     const fetchDetails = async () => {
-      if (!id) return;
       setLoading(true);
       setError(null);
       try {
-        const details = await mealApi.getMealDetails(id);
+        const details = await mealApi.getMealDetails(id, { signal: controller.signal });
         if (details) {
           setMeal(details);
         } else {
           setError('Recipe detail guide not found.');
         }
       } catch (err) {
-        setError('Failed to fetch recipe detail.');
+        if (!controller.signal.aborted) {
+          setError(
+            err instanceof ApiError
+              ? err.message
+              : 'Failed to fetch recipe detail.'
+          );
+        }
       } finally {
-        setLoading(false);
+        if (!controller.signal.aborted) {
+          setLoading(false);
+        }
       }
     };
+
     fetchDetails();
+    return () => controller.abort();
   }, [id]);
 
   // Extract ingredients list
